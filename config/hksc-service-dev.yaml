@@ -1,0 +1,50 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # 【核心修改1】host从 localhost 改为 hksc-mysql，端口用容器内部端口 3306
+    url: jdbc:mysql://hksc-mysql:3306/hksc_db?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: root
+    password: root
+    # 【安全增强】HikariCP 连接池配置（防止数据库连接假死或超时）
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      minimum-idle: 5             # 最小空闲连接
+      maximum-pool-size: 15       # 最大连接数（根据你的机器性能调整）
+      auto-commit: true
+      idle-timeout: 30000         # 空闲连接存活时间
+      pool-name: MyHikariCP
+      max-lifetime: 1800000       # 连接最大存活时间
+      connection-timeout: 30000   # 连接超时时间（30秒连不上就报错，别一直卡着）
+
+  data:
+    redis:
+      # 【核心修改2】host从 localhost 改为 hksc-redis
+      host: hksc-redis
+      port: 6379
+      database: 0
+      # 【安全增强】Redis 连接池配置
+      lettuce:
+        pool:
+          max-active: 8   # 最大连接数
+          max-wait: -1ms  # 最大阻塞等待时间
+          max-idle: 8     # 最大空闲连接
+          min-idle: 0     # 最小空闲连接
+
+  # 【补充】你的docker里还有RabbitMQ，建议也配置上，免得以后再改
+  rabbitmq:
+    host: hksc-rabbitmq
+    port: 5672
+    username: guest
+    password: guest
+
+# MyBatis Plus 配置
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+    # 生产/测试环境建议关闭 log-impl，避免日志文件爆炸，或者在Nacos里动态调整
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0

@@ -1,0 +1,35 @@
+server:
+  port: 8080 # 网关一般占用 8080 或 80
+
+spring:
+  application:
+    name: hksc-gateway
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      server-addr: localhost:8848 # Nacos 地址
+      discovery:
+        server-addr: ${spring.cloud.nacos.server-addr}
+      config:
+        server-addr: ${spring.cloud.nacos.server-addr}
+        file-extension: yaml
+        # 共享配置 (引入刚才创建的通用配置)
+        shared-configs:
+          - data-id: hksc-common.yaml
+            refresh: true
+
+    # 网关路由配置 (暂时先写个架子，后面有服务了再填)
+    gateway:
+      discovery:
+        locator:
+          enabled: true # 开启从注册中心动态创建路由的功能
+          lower-case-service-id: true # 使用小写服务名
+      routes:
+        - id: user_route # 路由ID
+          uri: lb://hksc-user # lb:// 代表负载均衡，转发给 hksc-user
+          predicates:
+            - Path=/api/user/** # 断言：如果路径是 /api/user 开头
+          filters:
+            - StripPrefix=1 # 过滤器：去掉第1层路径 (/api)
+

@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  # 1. Nacos (Derby 模式 + 数据持久化)
+  hksc-nacos:
+    image: nacos/nacos-server:v2.3.0
+    container_name: hksc-nacos
+    environment:
+      - MODE=standalone # 单机模式
+      - JVM_XMS=256m
+      - JVM_XMX=256m
+      # 移除所有 MYSQL 配置 -> Nacos 会自动使用内置 Derby 数据库
+      # 移除 AUTH 配置 -> 开发环境无需登录，避免 Token 报错
+    ports:
+      - "8848:8848"
+      - "9848:9848" # gRPC 端口
+      - "9849:9849"
+    volumes:
+      # 核心：将容器内的 Derby 数据库文件映射到宿主机，实现持久化
+      - ./data/nacos/data:/home/nacos/data
+      - ./data/nacos/logs:/home/nacos/logs
+    networks:
+      - hksc-net
+
+  # 2. MySQL (保留你之前的 3307 和 mysql_new)
+  hksc-mysql:
+    image: mysql:8.0
+    container_name: hksc-mysql
+    ports:
+      - "3307:3306" # 宿主机 3307 -> 容器 3306
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+    command:
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_general_ci
+    volumes:
+      - ./data/mysql_new:/var/lib/mysql
+    networks:
+      - hksc-net
+
+  # 3. Redis
+  hksc-redis:
+    image: redis:7.0
+    container_name: hksc-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    networks:
+      - hksc-net
+
+  # 4. RabbitMQ
+  hksc-rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: hksc-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    networks:
+      - hksc-net
+
+networks:
+  hksc-net:
+    driver: bridge
