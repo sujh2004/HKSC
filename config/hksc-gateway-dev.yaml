@@ -1,0 +1,42 @@
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true # 允许通过服务名直接访问(可选)
+      routes:
+        # ---------------------------
+        # 1. 认证服务路由 (Auth)
+        # ---------------------------
+        - id: auth-route
+          uri: lb://hksc-auth      # 转发给认证服务
+          predicates:
+            - Path=/api/auth/**    # 匹配规则：以 /api/auth 开头
+          filters:
+            - StripPrefix=1        # 剥离第1层路径: /api/auth/login -> /auth/login (如果Auth没写/auth前缀，这里可能要看Controller怎么写的)
+            # 修正：根据你之前的 AuthController 代码，你没有加 @RequestMapping("/auth")
+            # 所以如果 StripPrefix=1，请求 /api/auth/login 会变成 /auth/login
+            # 但你的 AuthController 只有 @PostMapping("/login")
+            # 所以这里其实 Auth 可能需要 StripPrefix=2 或者调整 Controller。
+            # ⚠️ 按照之前的测试 /api/auth/test/token 能通，说明之前的配置是 OK 的。
+            # 我们假设 Auth 那边兼容了路径，或者这里仅仅去掉了 /api。
+
+            # --- 最佳实践修正 ---
+            # 既然我们统一规范：前端访问 /api/服务名/接口
+            # 后端 Controller 通常写 @RequestMapping("/服务名") 或者干脆不写。
+            # 咱们按照 Day 2 测试成功的配置逻辑（去掉 /api）：
+
+        # ---------------------------
+        # 2. 用户服务路由 (User) - 本次新增
+        # ---------------------------
+        - id: user-route
+          uri: lb://hksc-user      # 转发给用户服务
+          predicates:
+            - Path=/api/user/**    # 匹配规则：以 /api/user 开头
+          filters:
+            - StripPrefix=1        # 这里的逻辑是：
+              # 1. 用户访问: http://localhost:8080/api/user/login
+              # 2. 网关去掉 /api -> 变成 /user/login
+              # 3. 转发给 hksc-user 服务
+              # 4. 你的 UserController 上写了 @RequestMapping("/user") 和 @PostMapping("/login")
+            # 5. 拼起来刚好是 /user/login -> ✅ 完美匹配

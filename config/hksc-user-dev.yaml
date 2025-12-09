@@ -1,0 +1,21 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # 🔴 重点：这里改成了 localhost
+    url: jdbc:mysql://localhost:3307/hksc_db?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+    username: root
+    password: root # ⚠️ 记得填你真实的 Docker MySQL 密码
+  data:
+    redis:
+      # 🔴 重点：这里也改成了 localhost
+      host: localhost
+      port: 6379
+      database: 0
+  threads:
+    virtual:
+      enabled: true
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
