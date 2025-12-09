@@ -15,6 +15,7 @@
         <module>hksc-common</module>
         <module>hksc-gateway</module>
         <module>hksc-user</module>
+        <module>hksc-auth</module>
     </modules>
 
     <properties>

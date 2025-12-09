@@ -1,0 +1,10 @@
+# 文件路径: hksc-auth/src/main/resources/application.yml
+
+server:
+  port: 8081 # 认证中心端口，与项目架构文档一致
+
+spring:
+  # JDK 21 虚拟线程配置
+  threads:
+    virtual:
+      enabled: true
