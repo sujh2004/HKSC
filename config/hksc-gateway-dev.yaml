@@ -40,3 +40,9 @@ spring:
               # 3. 转发给 hksc-user 服务
               # 4. 你的 UserController 上写了 @RequestMapping("/user") 和 @PostMapping("/login")
             # 5. 拼起来刚好是 /user/login -> ✅ 完美匹配
+        - id: product_route
+          uri: lb://hksc-product
+          predicates:
+            - Path=/api/product/**
+          filters:
+            - StripPrefix=1
