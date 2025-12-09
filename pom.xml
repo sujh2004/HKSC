@@ -13,6 +13,8 @@
     <description>HKSC 微服务电商平台</description>
     <modules>
         <module>hksc-common</module>
+        <module>hksc-gateway</module>
+        <module>hksc-user</module>
     </modules>
 
     <properties>
