@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  # 1. Nacos (更换为 v2.2.3 以避开损坏的缓存层)
+  hksc-nacos:
+    image: nacos/nacos-server:v2.2.3
+    container_name: hksc-nacos
+    environment:
+      MODE: standalone
+      JVM_XMS: 256m
+      JVM_XMX: 256m
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+      - "9849:9849"
+    volumes:
+      - ./data/nacos/data:/home/nacos/data
+      - ./data/nacos/logs:/home/nacos/logs
+    networks:
+      - hksc-net
+
+  # 2. MySQL (改用字典格式配置环境变量)
+  hksc-mysql:
+    image: mysql:8.0
+    container_name: hksc-mysql
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_general_ci
+    volumes:
+      - ./data/mysql_new:/var/lib/mysql # 修改挂载路径，确保重新初始化
+    networks:
+      - hksc-net
+
+  # 3. Redis
+  hksc-redis:
+    image: redis:7.0
+    container_name: hksc-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes
+    networks:
+      - hksc-net
+
+  # 4. RabbitMQ
+  hksc-rabbitmq:
+    image: rabbitmq:3.12-management
+    container_name: hksc-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - hksc-net
+
+networks:
+  hksc-net:
+    driver: bridge
