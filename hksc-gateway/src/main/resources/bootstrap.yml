@@ -41,3 +41,9 @@ spring:
           filters:
             - StripPrefix=1 # 过滤器：去掉第1层路径 (/api)
 
+        - id: product_route
+          uri: lb://hksc-product
+          predicates:
+            - Path=/api/product/**
+          filters:
+            - StripPrefix=1

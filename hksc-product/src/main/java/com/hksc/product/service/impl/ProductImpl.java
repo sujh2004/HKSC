@@ -1,4 +1,6 @@
 package com.hksc.product.service.impl;
 
-public class ProductImpl {
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+
+public class ProductImpl extends ServiceImpl {
 }

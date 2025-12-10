@@ -14,7 +14,6 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 )
 @EnableDiscoveryClient // 启用服务发现，将自己注册到 Nacos
 public class HkscAuthApplication {
-
     public static void main(String[] args) {
         SpringApplication.run(HkscAuthApplication.class, args);
     }

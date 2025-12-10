@@ -1,4 +1,7 @@
 package com.hksc.product.service;
 
-public interface ProductService {
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.hksc.product.entity.Product;
+
+public interface ProductService extends IService<Product> {
 }
