@@ -1,8 +1,8 @@
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    # 🔴 修正1：必须用 localhost
-    # 🔴 修正2：端口看你的 docker-compose，如果是 3306:3306 就填 3306，如果是 3307:3306 就填 3307
+    # 修正1：必须用 localhost
+    # 修正2：端口看你的 docker-compose，如果是 3306:3306 就填 3306，如果是 3307:3306 就填 3307
     url: jdbc:mysql://localhost:3307/hksc_db?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     username: root
     password: root # 你的真实密码
@@ -18,7 +18,7 @@ spring:
 
   data:
     redis:
-      # 🔴 修正3：必须用 localhost
+      # 修正3：必须用 localhost
       host: localhost
       port: 6379
       database: 0
@@ -30,7 +30,7 @@ spring:
           min-idle: 0
 
   rabbitmq:
-    # 🔴 修正4：必须用 localhost
+    # 修正4：必须用 localhost
     host: localhost
     port: 5672
     username: guest

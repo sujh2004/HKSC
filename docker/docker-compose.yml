@@ -6,15 +6,24 @@ services:
     image: nacos/nacos-server:v2.2.3
     container_name: hksc-nacos
     environment:
-      MODE: standalone
-      JVM_XMS: 256m
-      JVM_XMX: 256m
+      - MODE=standalone
+      - JVM_XMS=256m
+      - JVM_XMX=256m
+        # nacos配置持久化到mysql中
+      - SPRING_DATASOURCE_PLATFORM=mysql
+      - MYSQL_SERVICE_HOST=hksc-mysql      # 这里的名字必须和下面 MySQL 的 service 名字一致
+      - MYSQL_SERVICE_DB_NAME=nacos_config
+      - MYSQL_SERVICE_USER=root
+      - MYSQL_SERVICE_PASSWORD=root        # 对应你 MySQL 的 root 密码
+      - MYSQL_SERVICE_PORT=3306            # 🔴 注意！容器内部互联用 3306，不是 3307
+      -
+         MYSQL_SERVICE_DB_PARAM=characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true&useSSL=false
+
     ports:
       - "8848:8848"
       - "9848:9848"
       - "9849:9849"
     volumes:
-      - nacos_data:/home/nacos/data  # <--- 【修改点 1：使用命名卷】
       - ./data/nacos/logs:/home/nacos/logs
     networks:
       - hksc-net
