@@ -33,7 +33,6 @@ public class JwtUtils {
     }
 
     /**
-     * (可选) 校验 Token，Gateway 会用到
      * 这里简单写一下，能解析且不报错就是通过
      */
     public static void validateToken(String token) {
