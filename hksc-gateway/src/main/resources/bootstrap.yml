@@ -47,3 +47,11 @@ spring:
             - Path=/api/product/**
           filters:
             - StripPrefix=1
+
+        # 购物车服务
+        - id: cart_route
+          uri: lb://hksc-cart
+          predicates:
+            - Path=/api/cart/**
+          filters:
+            - StripPrefix=1

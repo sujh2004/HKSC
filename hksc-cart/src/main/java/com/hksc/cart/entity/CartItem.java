@@ -1,7 +1,6 @@
 package com.hksc.cart.entity;
 
 import lombok.Data;
-
 import java.io.Serializable;
 import java.math.BigDecimal;
 
