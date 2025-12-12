@@ -59,7 +59,8 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
                 "/api/user/login",
                 "/api/user/register",
                 "/api/user/code",
-                "/api/product/list" // (可选) 如果你想让商品列表不登录也能看，就加这里
+                "/api/product/list", // (可选) 如果你想让商品列表不登录也能看，就加这里
+                "/api/auth/**"
         );
         for (String pattern : whiteList) {
             if (antPathMatcher.match(pattern, path)) {
