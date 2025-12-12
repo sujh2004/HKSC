@@ -17,6 +17,9 @@ public class ProductController {
     @Autowired
     private ProductMapper productMapper;
 
+    @Autowired
+    private ProductService productService;
+
     @GetMapping("/list")
     public Result<Page<Product>> list(@RequestParam(defaultValue = "1") Integer page,
                                       @RequestParam(defaultValue = "10") Integer limit,
@@ -33,5 +36,10 @@ public class ProductController {
     @GetMapping("/detail/{id}")
     public Result<Product> detail(@PathVariable Long id){
         return Result.success(productMapper.selectById(id));
+    }
+
+    @PostMapping("/deduct")
+    public Result<Boolean> deductStock(@RequestParam Long productId, @RequestParam Integer count){
+        return Result.success(productService.doDeduction(productId,count));
     }
 }
