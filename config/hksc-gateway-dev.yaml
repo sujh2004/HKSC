@@ -46,3 +46,9 @@ spring:
             - Path=/api/product/**
           filters:
             - StripPrefix=1
+        - id: order-route
+          uri: lb://hksc-order     # 转发给 hksc-order 服务
+          predicates:
+            - Path=/api/order/**   # 匹配 /api/order 开头
+          filters:
+            - StripPrefix=1        # 去掉 /api

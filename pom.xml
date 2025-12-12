@@ -18,6 +18,7 @@
         <module>hksc-auth</module>
         <module>hksc-product</module>
         <module>hksc-cart</module>
+        <module>hksc-order</module>
     </modules>
 
     <properties>

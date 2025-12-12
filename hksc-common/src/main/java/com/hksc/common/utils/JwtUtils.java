@@ -41,4 +41,16 @@ public class JwtUtils {
                 .build()
                 .parseClaimsJws(token);
     }
+    public static Long getUserId(String token) {
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(KEY)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .get("userId", Long.class); // 获取载荷中的 userId
+        } catch (Exception e) {
+            return null; // 解析失败
+        }
+    }
 }

@@ -1,0 +1,16 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: hksc-order
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      config:
+        server-addr: localhost:8848
+        file-extension: yaml
+  config:
+    import:
+      - optional:nacos:${spring.application.name}-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
