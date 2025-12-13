@@ -9,8 +9,12 @@
     <file url="file://$PROJECT_DIR$/hksc-common/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/hksc-gateway/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/hksc-gateway/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/hksc-order/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/hksc-order/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/hksc-product/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/hksc-product/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/hksc-search/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/hksc-search/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/hksc-user/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/hksc-user/src/main/resources" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />

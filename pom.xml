@@ -19,6 +19,7 @@
         <module>hksc-product</module>
         <module>hksc-cart</module>
         <module>hksc-order</module>
+        <module>hksc-search</module>
     </modules>
 
     <properties>

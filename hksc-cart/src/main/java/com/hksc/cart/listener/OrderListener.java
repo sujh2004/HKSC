@@ -27,7 +27,6 @@ public class OrderListener {
             String userId = parts[0];
             String productId = parts[1];
 
-            // 3. 构造与 addToCart 完全一致的 Key
             String key = CART_PREFIX + userId;
 
             // 4. 执行删除
