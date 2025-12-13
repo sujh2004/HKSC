@@ -8,6 +8,7 @@ import jakarta.annotation.Resource;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,8 @@ public class ProductImpl extends ServiceImpl<ProductMapper, Product> implements 
     @Resource
     private RedissonClient redissonClient;
 
+    // 👇👇👇 加上 @Lazy，打破循环依赖 👇👇👇
+    @Lazy
     @Resource
     private ProductService selfProxy;
 

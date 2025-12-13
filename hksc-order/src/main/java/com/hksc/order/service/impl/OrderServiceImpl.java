@@ -2,6 +2,7 @@ package com.hksc.order.service.impl;
 
 import com.hksc.common.result.Result;
 import com.hksc.order.dto.OrderCreateDTO;
+import com.hksc.order.dto.ProductDTO;
 import com.hksc.order.entity.OrderInfo;
 import com.hksc.order.entity.OrderItem;
 import com.hksc.order.feign.ProductClient;
@@ -40,8 +41,8 @@ public class OrderServiceImpl implements OrderService {
         OrderInfo order = new OrderInfo();
         order.setUserId(userId);
         order.setStatus(0); // 待付款
-        // 假设单价是 100 (实际应该远程查 ProductClient 获取价格)
-        BigDecimal price = new BigDecimal("100.00");
+        Result<ProductDTO> productResult = productClient.getProduct(dto.getProductId());
+        BigDecimal price = productResult.getData().getPrice();
         order.setTotalAmount(price.multiply(BigDecimal.valueOf(dto.getCount())));
         orderMapper.insert(order); // MyBatisPlus 会自动回填 ID 到 order 对象
 
