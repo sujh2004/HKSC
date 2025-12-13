@@ -68,6 +68,14 @@ services:
     networks:
       - hksc-net
 
+  hksc-es:
+    image: elasticsearch:8.1.0
+    container_name: hksc-es
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+
+
 networks:
   hksc-net:
     driver: bridge
