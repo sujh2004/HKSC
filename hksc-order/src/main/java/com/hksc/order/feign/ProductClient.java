@@ -19,4 +19,7 @@ public interface ProductClient {
     // 查询商品价格
     @GetMapping("/product/detail/{id}")
     Result<ProductDTO> getProduct(@PathVariable("id") Long id);
+
+    @PostMapping("/product/restore")
+    Result<Boolean> restoreStock(@RequestParam("productId") Long productId, @RequestParam("count") Integer count);
 }

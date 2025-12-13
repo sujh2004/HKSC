@@ -1,0 +1,17 @@
+server:
+  port: 8086 # AI服务端口
+
+spring:
+  application:
+    name: hksc-ai
+  profiles:
+    active: dev
+  cloud:
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+
+  # 👇👇👇 核心：开启 JDK 21 虚拟线程 👇👇👇
+  threads:
+    virtual:
+      enabled: true

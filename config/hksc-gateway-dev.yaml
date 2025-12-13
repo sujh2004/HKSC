@@ -52,3 +52,10 @@ spring:
             - Path=/api/order/**   # 匹配 /api/order 开头
           filters:
             - StripPrefix=1        # 去掉 /api
+        # 4. AI 服务路由
+        - id: ai-route
+          uri: lb://hksc-ai
+          predicates:
+            - Path=/api/ai/**
+          filters:
+            - StripPrefix=1

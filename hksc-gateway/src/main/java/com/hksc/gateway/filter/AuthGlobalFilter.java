@@ -11,6 +11,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
+import org.springframework.core.io.buffer.DataBuffer;
+import org.springframework.http.MediaType;
+import java.nio.charset.StandardCharsets;
 
 import java.util.List;
 
@@ -74,7 +77,15 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
     private Mono<Void> out(ServerWebExchange exchange, HttpStatus status) {
         ServerHttpResponse response = exchange.getResponse();
         response.setStatusCode(status);
-        return response.setComplete();
+        response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
+
+        // 构造一个 JSON 字符串
+        String message = "{\"code\": " + status.value() + ", \"message\": \"网关鉴权失败：Token无效或缺失\", \"data\": null}";
+        byte[] bytes = message.getBytes(StandardCharsets.UTF_8);
+
+        DataBuffer buffer = response.bufferFactory().wrap(bytes);
+        // 把 JSON 写回给前端
+        return response.writeWith(Mono.just(buffer));
     }
 
     @Override

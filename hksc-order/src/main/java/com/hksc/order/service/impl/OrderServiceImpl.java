@@ -58,6 +58,7 @@ public class OrderServiceImpl implements OrderService {
         // 消息格式： "userId:productId"
         String msg = userId + ":" + dto.getProductId();
         rabbitTemplate.convertAndSend("order.created.queue", msg);
+        rabbitTemplate.convertAndSend("", "order.delay.queue", order.getId().toString());
 
         return Result.success(order.getId().toString());
     }

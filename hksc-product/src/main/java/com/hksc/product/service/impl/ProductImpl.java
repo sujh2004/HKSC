@@ -80,4 +80,16 @@ public class ProductImpl extends ServiceImpl<ProductMapper, Product> implements 
         // 方法返回后，Spring 事务提交。
         // 提交成功后，外部方法才能继续执行 finally 释放锁。
     }
+
+    @Override
+    public boolean restoreStock(Long productId, Integer count) {
+        Product product = baseMapper.selectById(productId);
+        if (product != null) {
+            // 简单粗暴：库存 + count
+            product.setStock(product.getStock() + count);
+            baseMapper.updateById(product);
+            return true;
+        }
+        return false;
+    }
 }

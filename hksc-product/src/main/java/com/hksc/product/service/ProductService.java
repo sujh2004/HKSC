@@ -9,4 +9,7 @@ public interface ProductService extends IService<Product> {
 
     // 2. 内部方法：负责事务和数据库操作
     void deductStockInternal(Long productId, Integer count);
+
+    // 新增方法定义
+    boolean restoreStock(Long productId, Integer count);
 }

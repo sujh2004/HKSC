@@ -42,4 +42,11 @@ public class ProductController {
     public Result<Boolean> deductStock(@RequestParam Long productId, @RequestParam Integer count){
         return Result.success(productService.doDeduction(productId,count));
     }
+
+    // 新增接口
+    @PostMapping("/restore")
+    public Result<Boolean> restoreStock(@RequestParam Long productId, @RequestParam Integer count) {
+        productService.restoreStock(productId, count);
+        return Result.success(true);
+    }
 }
