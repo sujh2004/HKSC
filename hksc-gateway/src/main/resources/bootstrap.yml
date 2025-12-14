@@ -23,24 +23,26 @@ spring:
     gateway:
       discovery:
         locator:
-          enabled: true # 开启从注册中心动态创建路由的功能
-          lower-case-service-id: true # 使用小写服务名
+          enabled: true
+          lower-case-service-id: true
       routes:
-        # AUTH 服务的路由 (新增)
+        # 1. Auth 服务
         - id: auth_route
-          uri: lb://hksc-auth # 转发到注册中心名为 hksc-auth 的服务
+          uri: lb://hksc-auth
           predicates:
-            - Path=/api/auth/** # 匹配所有 /api/auth/ 开头的请求
+            - Path=/api/auth/**
           filters:
-            - StripPrefix=1 # 剥离路径的第一个部分 (/api)，转发给 hksc-auth 的路径为 /auth/**
+            - StripPrefix=1
 
-        - id: user_route # 路由ID
-          uri: lb://hksc-user # lb:// 代表负载均衡，转发给 hksc-user
+        # 2. User 服务
+        - id: user_route
+          uri: lb://hksc-user
           predicates:
-            - Path=/api/user/** # 断言：如果路径是 /api/user 开头
+            - Path=/api/user/**
           filters:
-            - StripPrefix=1 # 过滤器：去掉第1层路径 (/api)
+            - StripPrefix=1
 
+        # 3. Product 服务
         - id: product_route
           uri: lb://hksc-product
           predicates:
@@ -48,10 +50,26 @@ spring:
           filters:
             - StripPrefix=1
 
-        # 购物车服务
+        # 4. Order 服务
+        - id: order_route
+          uri: lb://hksc-order
+          predicates:
+            - Path=/api/order/**
+          filters:
+            - StripPrefix=1
+
+        # 5. Cart 服务 (之前丢失了)
         - id: cart_route
           uri: lb://hksc-cart
           predicates:
             - Path=/api/cart/**
+          filters:
+            - StripPrefix=1
+
+        # 6. Search 服务 (之前丢失了)
+        - id: search_route
+          uri: lb://hksc-search
+          predicates:
+            - Path=/api/search/**
           filters:
             - StripPrefix=1

@@ -11,7 +11,7 @@ spring:
       config:
         server-addr: localhost:8848 # Nacos 地址
         file-extension: yaml
-  # 👇👇👇 核心报错原因：Spring Boot 3 必须加这几行才能连 Nacos 配置中心 👇👇👇
+  # 核心报错原因：Spring Boot 3 必须加这几行才能连 Nacos 配置中心
   config:
     import:
       - optional:nacos:${spring.application.name}-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}

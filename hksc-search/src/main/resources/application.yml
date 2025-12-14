@@ -1,0 +1,23 @@
+server:
+  port: 8087 # 搜索服务端口
+
+spring:
+  application:
+    name: hksc-search
+  profiles:
+    active: dev
+  config:
+    import:
+      - optional:nacos:hksc-service-dev.yaml
+
+  # ES 配置 (Spring Boot 3 自动配置)
+  elasticsearch:
+    uris: http://localhost:9200
+    socket-timeout: 30s
+    connection-timeout: 5s
+
+  cloud:
+    nacos:
+      server-addr: localhost:8848
+      discovery:
+        server-addr: localhost:8848
