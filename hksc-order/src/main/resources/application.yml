@@ -1,27 +1,16 @@
-server:
-  port: 8084
-
 spring:
   application:
     name: hksc-order
   profiles:
     active: dev
-  cloud:
-    nacos:
-      config:
-        server-addr: localhost:8848
-        file-extension: yaml
-    sentinel:
-      transport:
-        dashboard: localhost:8858  # 控制台地址
-        port: 8719                 # 交互端口
-        # 👇👇👇 核心检查点：这行还在吗？回退肯定把它弄没了！ 👇👇👇
-        client-ip: 127.0.0.1
   config:
     import:
-      - optional:nacos:${spring.application.name}-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
-
-
-feign:
-  sentinel:
-    enabled: true
+      - optional:nacos:${spring.application.name}-${spring.profiles.active}.yaml
+  cloud:
+    nacos:
+      server-addr: localhost:8848
+      config:
+        file-extension: yaml
+        shared-configs:
+          - data-id: hksc-common.yaml
+            refresh: true

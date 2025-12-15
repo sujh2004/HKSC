@@ -1,20 +1,16 @@
-server:
-  port: 8083
-
 spring:
   application:
     name: hksc-product
   profiles:
     active: dev
-
   config:
     import:
-      - optional:nacos:hksc-service-dev.yaml
-
+      - optional:nacos:${spring.application.name}-${spring.profiles.active}.yaml
   cloud:
     nacos:
       server-addr: localhost:8848
-      discovery:
-        server-addr: localhost:8848
       config:
-        file-extension: yaml # 这一行很关键，确保能识别 Nacos 里的 yaml 文件
+        file-extension: yaml
+        shared-configs:
+          - data-id: hksc-common.yaml
+            refresh: true

@@ -1,17 +1,16 @@
-server:
-  port: 8082  # 用户服务占用 8082 端口
-
 spring:
   application:
-    name: hksc-user  # 名字必须和 Nacos 上新建的配置名一致
+    name: hksc-user
   profiles:
-    active: dev      # 激活 dev 环境
-  cloud:
-    nacos:
-      config:
-        server-addr: localhost:8848 # Nacos 地址
-        file-extension: yaml
-  # 核心报错原因：Spring Boot 3 必须加这几行才能连 Nacos 配置中心
+    active: dev
   config:
     import:
-      - optional:nacos:${spring.application.name}-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+      - optional:nacos:${spring.application.name}-${spring.profiles.active}.yaml
+  cloud:
+    nacos:
+      server-addr: localhost:8848
+      config:
+        file-extension: yaml
+        shared-configs:
+          - data-id: hksc-common.yaml
+            refresh: true

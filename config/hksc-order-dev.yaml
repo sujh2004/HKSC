@@ -1,20 +1,6 @@
+server:
+  port: 8084
+
 spring:
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3307/hksc_order?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
-    username: root
-    password: root
-
-  rabbitmq:
-    host: localhost
-    port: 5672
-    username: guest
-    password: guest
-
-mybatis-plus:
-  configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-    map-underscore-to-camel-case: true
-  global-config:
-    db-config:
-      id-type: assign_id # 关键：开启雪花算法生成ID
+    url: jdbc:mysql://localhost:3307/hksc_order?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true

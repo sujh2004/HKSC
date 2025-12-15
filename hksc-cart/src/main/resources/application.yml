@@ -1,6 +1,3 @@
-server:
-  port: 8085
-
 spring:
   application:
     name: hksc-cart
@@ -8,10 +5,12 @@ spring:
     active: dev
   config:
     import:
-      - optional:nacos:hksc-service-dev.yaml
-
+      - optional:nacos:${spring.application.name}-${spring.profiles.active}.yaml
   cloud:
     nacos:
       server-addr: localhost:8848
-      discovery:
-        server-addr: localhost:8848
+      config:
+        file-extension: yaml
+        shared-configs:
+          - data-id: hksc-common.yaml
+            refresh: true
