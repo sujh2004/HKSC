@@ -3,6 +3,7 @@ package com.hksc.user.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.hksc.common.result.Result;
 import com.hksc.common.utils.JwtUtils;
+import com.hksc.user.dto.UserLoginDTO;
 import com.hksc.user.dto.UserRegisterDTO;
 import com.hksc.user.entity.User;
 import com.hksc.user.mapper.UserMapper;
@@ -63,13 +64,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Result<Map<String, String>> login(String phone, String password) {
-        User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getPhone, phone));
+    public Result<Map<String, String>> login(UserLoginDTO dto) {
+        User user = userMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getPhone, dto.getPhone()));
         if (user == null) {
             return Result.error("用户不存在");
         }
 
-        String inputPwd = DigestUtils.md5DigestAsHex(password.getBytes(StandardCharsets.UTF_8));
+        String inputPwd = DigestUtils.md5DigestAsHex(dto.getPassword().getBytes(StandardCharsets.UTF_8));
         if (!inputPwd.equals(user.getPassword())) {
             return Result.error("密码错误");
         }

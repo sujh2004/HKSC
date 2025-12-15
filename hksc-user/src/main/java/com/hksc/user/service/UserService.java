@@ -1,6 +1,7 @@
 package com.hksc.user.service;
 
 import com.hksc.common.result.Result;
+import com.hksc.user.dto.UserLoginDTO;
 import com.hksc.user.dto.UserRegisterDTO;
 import java.util.Map;
 
@@ -23,5 +24,5 @@ public interface UserService {
     /**
      * 用户登录
      */
-    Result<Map<String, String>> login(String phone, String password);
+    Result<Map<String, String>> login(UserLoginDTO dto);
 }

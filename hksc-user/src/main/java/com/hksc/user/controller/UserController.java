@@ -1,6 +1,7 @@
 package com.hksc.user.controller;
 
 import com.hksc.common.result.Result;
+import com.hksc.user.dto.UserLoginDTO;
 import com.hksc.user.dto.UserRegisterDTO;
 import com.hksc.user.service.UserService; // 引入接口
 import jakarta.annotation.Resource;
@@ -38,7 +39,7 @@ public class UserController {
      * 请求路径: POST /user/login?phone=...&password=...
      */
     @PostMapping("/login")
-    public Result<Map<String, String>> login(@RequestParam String phone, @RequestParam String password) {
-        return userService.login(phone, password);
+    public Result<Map<String, String>> login(@RequestBody UserLoginDTO dto) { // 必须加 @RequestBody
+        return userService.login(dto);
     }
 }

@@ -7,7 +7,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients; // 👈 导这个
 
 @SpringBootApplication
 @EnableDiscoveryClient
-@EnableFeignClients // 🔴 必须加这个！
+@EnableFeignClients
 public class AiApplication {
     public static void main(String[] args) {
         SpringApplication.run(AiApplication.class, args);

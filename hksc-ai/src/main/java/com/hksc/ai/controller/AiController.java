@@ -1,9 +1,13 @@
 package com.hksc.ai.controller;
 
+import cn.hutool.http.HttpRequest; // Hutool 工具
+import com.fasterxml.jackson.databind.JsonNode; // Jackson
+import com.fasterxml.jackson.databind.ObjectMapper; // Jackson
 import com.hksc.ai.dto.ProductDTO;
 import com.hksc.ai.feign.ProductClient;
 import com.hksc.common.result.Result;
-import jakarta.annotation.Resource;
+import jakarta.annotation.Resource; // Spring 注入
+import org.springframework.beans.factory.annotation.Value; // 读取配置
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -23,30 +27,52 @@ public class AiController {
     /**
      * 接口1: 模拟调用大模型生成商品文案
      */
+    @Value("${ai.api-key}")
+    private String apiKey;
+
+    @Value("${ai.model:qwen-turbo}")
+    private String modelName;
+
+    @Resource
+    private ObjectMapper objectMapper; // 记得导入 Jackson 包
+
     @GetMapping("/generate")
     public Result<String> generateDescription(@RequestParam String keyword) {
+        System.out.println("收到 AI 请求: " + keyword + " | 线程: " + Thread.currentThread());
 
-        // 1. 获取当前线程信息
-        Thread currentThread = Thread.currentThread();
-        System.out.println("收到请求: " + keyword + " | 处理线程: " + currentThread);
-
-        try {
-            // 2. 模拟耗时操作 (比如请求 OpenAI API 需要 3 秒)
-            TimeUnit.SECONDS.sleep(2);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        // 3. 模拟返回 AI 生成的文案
-        String aiText = String.format(
-                "【AI 智能推荐】这款 %s 采用了2025年最前沿的设计理念，" +
-                        "融合了极致的工艺与人性化的功能。无论是自用还是送礼，" +
-                        "它都能彰显您不凡的品味。限时特惠，此时不买更待何时？",
-                keyword
+        // 1. 构造 OpenAI 标准请求体
+        String prompt = "请为商品“" + keyword + "”写一段电商营销文案，50字以内，语气吸引人。";
+        String jsonBody = String.format(
+                "{\"model\": \"%s\", \"messages\": [{\"role\": \"user\", \"content\": \"%s\"}]}",
+                modelName, prompt
         );
 
-        return Result.success(aiText);
-    } // 👈 generateDescription 方法在这里结束
+        try {
+            // 2. 发送请求 (阿里云百炼 OpenAI 兼容地址)
+            String responseBody = HttpRequest.post("https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions")
+                    .header("Authorization", "Bearer " + apiKey)
+                    .header("Content-Type", "application/json")
+                    .body(jsonBody)
+                    .timeout(10000)
+                    .execute()
+                    .body();
+
+            // 3. 解析结果
+            JsonNode rootNode = objectMapper.readTree(responseBody);
+
+            if (rootNode.has("error")) {
+                return Result.error("AI调用失败: " + rootNode.path("error").path("message").asText());
+            }
+
+            // 提取内容
+            String aiText = rootNode.path("choices").get(0).path("message").path("content").asText();
+            return Result.success(aiText);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Result.error("AI 服务响应异常");
+        }
+    }
 
     // ----------------------------------------------------------------------
 

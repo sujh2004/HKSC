@@ -2,6 +2,7 @@ package com.hksc.order.feign;
 
 import com.hksc.common.result.Result;
 import com.hksc.order.dto.ProductDTO;
+import com.hksc.order.feign.fallback.ProductClientFallback;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -9,7 +10,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 // name = 服务名 (nacos里显示的名字)
-@FeignClient(name = "hksc-product")
+
+@FeignClient(name = "hksc-product", fallback = ProductClientFallback.class)
 public interface ProductClient {
 
     // 假设开发者B会提供这个接口：扣减库存

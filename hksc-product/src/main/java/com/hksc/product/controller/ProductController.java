@@ -40,6 +40,12 @@ public class ProductController {
 
     @PostMapping("/deduct")
     public Result<Boolean> deductStock(@RequestParam Long productId, @RequestParam Integer count){
+//        try {
+//            Thread.sleep(2000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+
         return Result.success(productService.doDeduction(productId,count));
     }
 

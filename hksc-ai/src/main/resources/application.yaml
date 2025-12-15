@@ -1,17 +1,27 @@
 server:
-  port: 8086 # AI服务端口
+  port: 8086
 
 spring:
   application:
     name: hksc-ai
   profiles:
     active: dev
+
+  # 👇👇👇 核心修复：必须加上这段才能读 Nacos 配置 👇👇👇
+  config:
+    import:
+      - optional:nacos:${spring.application.name}-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+
   cloud:
     nacos:
       discovery:
         server-addr: localhost:8848
+      # 👇👇👇 核心修复：必须加上 config 地址 👇👇👇
+      config:
+        server-addr: localhost:8848
+        file-extension: yaml
 
-  # 👇👇👇 核心：开启 JDK 21 虚拟线程 👇👇👇
+  # 虚拟线程配置
   threads:
     virtual:
       enabled: true

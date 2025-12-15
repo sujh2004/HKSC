@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # 1. Nacos (更换为 v2.2.3 以避开损坏的缓存层)
+  # 1. Nacos
   hksc-nacos:
     image: nacos/nacos-server:v2.2.3
     container_name: hksc-nacos
@@ -9,26 +9,26 @@ services:
       - MODE=standalone
       - JVM_XMS=256m
       - JVM_XMX=256m
-        # nacos配置持久化到mysql中
       - SPRING_DATASOURCE_PLATFORM=mysql
-      - MYSQL_SERVICE_HOST=hksc-mysql      # 这里的名字必须和下面 MySQL 的 service 名字一致
+      - MYSQL_SERVICE_HOST=hksc-mysql
       - MYSQL_SERVICE_DB_NAME=nacos_config
       - MYSQL_SERVICE_USER=root
-      - MYSQL_SERVICE_PASSWORD=root        # 对应你 MySQL 的 root 密码
-      - MYSQL_SERVICE_PORT=3306            # 🔴 注意！容器内部互联用 3306，不是 3307
-      -
-         MYSQL_SERVICE_DB_PARAM=characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true&useSSL=false
-
+      - MYSQL_SERVICE_PASSWORD=root
+      - MYSQL_SERVICE_PORT=3306
+      # 👇👇👇 修正了这里的语法错误 👇👇👇
+      - MYSQL_SERVICE_DB_PARAM=characterEncoding=utf8&connectTimeout=1000&socketTimeout=3000&autoReconnect=true&useSSL=false
     ports:
       - "8848:8848"
       - "9848:9848"
       - "9849:9849"
     volumes:
       - ./data/nacos/logs:/home/nacos/logs
+    depends_on:
+      - hksc-mysql
     networks:
       - hksc-net
 
-  # 2. MySQL (改用字典格式配置环境变量)
+  # 2. MySQL
   hksc-mysql:
     image: mysql:8.0
     container_name: hksc-mysql
@@ -41,7 +41,7 @@ services:
       --character-set-server=utf8mb4
       --collation-server=utf8mb4_general_ci
     volumes:
-      - ./data/mysql_new:/var/lib/mysql # 修改挂载路径，确保重新初始化
+      - ./data/mysql_new:/var/lib/mysql
     networks:
       - hksc-net
 
@@ -68,22 +68,43 @@ services:
     networks:
       - hksc-net
 
+  # 5. Elasticsearch (搜索引擎 - 新增)
   hksc-es:
-    image: elasticsearch:8.1.0
+    image: elasticsearch:8.11.1  # 建议用新一点的版本
     container_name: hksc-es
+    environment:
+      - "discovery.type=single-node"       # 单机模式
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"   # 限制内存，防止电脑卡死
+      - "xpack.security.enabled=false"     # 关闭密码，方便开发
     ports:
       - "9200:9200"
       - "9300:9300"
-
-  hksc-sentinel:
-    image: bladex/sentinel-dashboard:1.8.6
-    container_name: hksc-sentinel
-    ports:
-      - "8858:8858"
-    environment:
-      - JAVA_OPTS=-Dserver.port=8858 -Dcsp.sentinel.dashboard.server=localhost:8858 -Dproject.name=sentinel-dashboard
     networks:
       - hksc-net
+
+  # 6. Kibana (ES的可视化界面 - 强烈建议加上，方便看数据)
+  hksc-kibana:
+    image: kibana:8.11.1
+    container_name: hksc-kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://hksc-es:9200
+    depends_on:
+      - hksc-es
+    networks:
+      - hksc-net
+
+  # 7. Sentinel (建议注释掉，用本地 JAR 跑更稳定)
+  # hksc-sentinel:
+  #   image: bladex/sentinel-dashboard:1.8.6
+  #   container_name: hksc-sentinel
+  #   ports:
+  #     - "8858:8858"
+  #   environment:
+  #     - JAVA_OPTS=-Dserver.port=8858 -Dcsp.sentinel.dashboard.server=localhost:8858 -Dproject.name=sentinel-dashboard
+  #   networks:
+  #     - hksc-net
 
 networks:
   hksc-net:
