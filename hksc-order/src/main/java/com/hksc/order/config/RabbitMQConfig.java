@@ -1,6 +1,8 @@
 package com.hksc.order.config;
 
 import org.springframework.amqp.core.*;
+import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
+import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -9,6 +11,11 @@ import java.util.Map;
 
 @Configuration
 public class RabbitMQConfig {
+
+    @Bean
+    public MessageConverter messageConverter() {
+        return new Jackson2JsonMessageConverter();
+    }
 
     // 1. 之前定义的下单通知队列 (保持不变)
     @Bean
@@ -52,5 +59,27 @@ public class RabbitMQConfig {
         return QueueBuilder.durable("order.delay.queue")
                 .withArguments(args)
                 .build();
+    }
+
+    // ================== 新增：秒杀专用配置 ==================
+
+    // 6. 定义秒杀专用交换机
+    @Bean
+    public DirectExchange seckillExchange() {
+        return new DirectExchange("seckill.direct");
+    }
+
+    // 7. 定义秒杀削峰队列 (订单服务监听这个)
+    @Bean
+    public Queue seckillOrderQueue() {
+        return new Queue("seckill.order.queue", true);
+    }
+
+    // 8. 绑定
+    @Bean
+    public Binding bindingSeckill() {
+        return BindingBuilder.bind(seckillOrderQueue())
+                .to(seckillExchange())
+                .with("seckill.order"); // Routing Key
     }
 }

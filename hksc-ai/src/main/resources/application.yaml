@@ -5,12 +5,10 @@ spring:
     active: dev
   config:
     import:
+      - optional:nacos:hksc-common.yaml
       - optional:nacos:${spring.application.name}-${spring.profiles.active}.yaml
   cloud:
     nacos:
       server-addr: localhost:8848
       config:
         file-extension: yaml
-        shared-configs:
-          - data-id: hksc-common.yaml  # 自动继承 Redis/Sentinel 等通用配置
-            refresh: true

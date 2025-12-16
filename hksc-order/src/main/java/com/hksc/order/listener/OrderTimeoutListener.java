@@ -66,8 +66,8 @@ public class OrderTimeoutListener {
                 for (OrderItem item : items) {
                     try {
                         // 远程 Feign 调用
-                        productClient.restoreStock(item.getProductId(), item.getQuantity());
-                        System.out.println("【库存回滚】商品 " + item.getProductId() + " 库存已归还: " + item.getQuantity());
+                        productClient.restoreStock(item.getProductId(), item.getBuyCount());
+                        System.out.println("【库存回滚】商品 " + item.getProductId() + " 库存已归还: " + item.getBuyCount());
                     } catch (Exception e) {
                         // 捕获异常，防止因为网络抖动导致整个事务回滚（订单取消失败）
                         // 在实际生产中，这里应该写入一张"异常日志表"，后续由定时任务重试
