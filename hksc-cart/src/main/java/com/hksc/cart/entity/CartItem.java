@@ -11,6 +11,7 @@ public class CartItem implements Serializable {
     private String image;      // 图片
     private BigDecimal price;  // 加入购物车时的价格
     private Integer count;     // 购买数量
+    private Integer stock;     // 商品库存
 
     private Boolean checked = true;
 }

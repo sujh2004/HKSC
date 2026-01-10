@@ -1,7 +1,0 @@
-server:
-  port: 8087
-spring:
-  elasticsearch:
-    uris: http://localhost:9200
-    socket-timeout: 30s
-    connection-timeout: 5s

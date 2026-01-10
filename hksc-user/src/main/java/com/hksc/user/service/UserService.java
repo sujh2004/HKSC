@@ -25,4 +25,19 @@ public interface UserService {
      * 用户登录
      */
     Result<Map<String, String>> login(UserLoginDTO dto);
+
+    /**
+     * 用户退出登录
+     */
+    Result<String> logout(Long userId);
+
+    /**
+     * 刷新Token
+     */
+    Result<Map<String, String>> refreshToken(String refreshToken);
+
+    /**
+     * 获取用户信息
+     */
+    Result<Map<String, Object>> getUserInfo(Long userId);
 }

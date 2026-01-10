@@ -1,0 +1,1 @@
+server:\n  port: 8084\n\nspring:\n  datasource:\n    url: jdbc:mysql://localhost:3307/hksc_order?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true\n\nfeign:\n  sentinel:\n    enabled: true \n

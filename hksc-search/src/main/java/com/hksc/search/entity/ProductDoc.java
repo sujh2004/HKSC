@@ -5,6 +5,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+import org.springframework.data.elasticsearch.annotations.CompletionField;
+import org.springframework.data.elasticsearch.core.suggest.Completion;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -17,8 +19,8 @@ public class ProductDoc implements Serializable {
     @Id
     private Long id;
 
-    // type = Text 表示支持分词搜索, analyzer = "standard" (标准分词，中文支持一般但不用装插件)
-    @Field(type = FieldType.Text, analyzer = "standard")
+    // type = Text 表示支持分词搜索, analyzer = "ik_max_word" (IK分词器)
+    @Field(type = FieldType.Text, analyzer = "ik_max_word")
     private String title;
 
     @Field(type = FieldType.Keyword) // Keyword 表示不分词，必须完全匹配
@@ -35,4 +37,11 @@ public class ProductDoc implements Serializable {
 
     @Field(type = FieldType.Integer)
     private Integer stock;
+
+    /**
+     * 自动补全字段
+     * 用于搜索建议功能
+     */
+    @CompletionField
+    private Completion suggest;
 }

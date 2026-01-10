@@ -17,19 +17,54 @@ public class JwtUtils {
     // 2. 转换成 Key 对象
     private static final SecretKey KEY = Keys.hmacShaKeyFor(SECRET_STRING.getBytes(StandardCharsets.UTF_8));
 
-    private static final long EXPIRE = 1000 * 60 * 60 * 24; // 24小时
+    // Access Token：15分钟（短期，频繁过期，安全性高）
+    private static final long ACCESS_TOKEN_EXPIRE = 1000 * 60 * 15;
+
+    // Refresh Token：7天（长期，用于刷新Access Token）
+    private static final long REFRESH_TOKEN_EXPIRE = 1000 * 60 * 60 * 24 * 7;
 
     /**
-     * 生成 Token
+     * 生成 Access Token（短期）
      */
     public static String createToken(Long userId, String username) {
         return Jwts.builder()
                 .setSubject(username)
                 .claim("userId", userId)
+                .claim("type", "access")  // 标记为Access Token
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRE))
-                .signWith(KEY, SignatureAlgorithm.HS256) // 注意写法变化
+                .setExpiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRE))
+                .signWith(KEY, SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    /**
+     * 生成 Refresh Token（长期）
+     */
+    public static String createRefreshToken(Long userId, String username) {
+        return Jwts.builder()
+                .setSubject(username)
+                .claim("userId", userId)
+                .claim("type", "refresh")  // 标记为Refresh Token
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRE))
+                .signWith(KEY, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    /**
+     * 验证Token类型
+     */
+    public static String getTokenType(String token) {
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(KEY)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .get("type", String.class);
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /**

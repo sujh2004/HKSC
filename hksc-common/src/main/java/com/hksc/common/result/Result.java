@@ -36,4 +36,15 @@ public class Result<T> implements Serializable {
         result.setMessage(msg);
         return result;
     }
+
+    /**
+     * 通用构建方法，可以自定义 code, message 和 data
+     */
+    public static <T> Result<T> build(T data, Integer code, String msg) {
+        Result<T> result = new Result<>();
+        result.setData(data);
+        result.setCode(code);
+        result.setMessage(msg);
+        return result;
+    }
 }

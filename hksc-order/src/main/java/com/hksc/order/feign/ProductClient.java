@@ -14,14 +14,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(name = "hksc-product", fallback = ProductClientFallback.class)
 public interface ProductClient {
 
-    // 假设开发者B会提供这个接口：扣减库存
+    // 扣减库存
     @PostMapping("/product/deduct")
     Result<Boolean> deductStock(@RequestParam("productId") Long productId, @RequestParam("count") Integer count);
 
-    // 查询商品价格
-    @GetMapping("/product/detail/{id}")
+    // 查询商品DTO（用于Feign调用）
+    @GetMapping("/product/dto/{id}")
     Result<ProductDTO> getProduct(@PathVariable("id") Long id);
 
+    // 恢复库存
     @PostMapping("/product/restore")
     Result<Boolean> restoreStock(@RequestParam("productId") Long productId, @RequestParam("count") Integer count);
 }

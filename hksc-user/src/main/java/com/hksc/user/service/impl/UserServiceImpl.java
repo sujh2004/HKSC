@@ -75,14 +75,112 @@ public class UserServiceImpl implements UserService {
             return Result.error("密码错误");
         }
 
-        String token = JwtUtils.createToken(user.getId(), user.getPhone());
+        // 生成Access Token和Refresh Token
+        String accessToken = JwtUtils.createToken(user.getId(), user.getPhone());
+        String refreshToken = JwtUtils.createRefreshToken(user.getId(), user.getPhone());
 
-        stringRedisTemplate.opsForValue().set("login:token:" + token, user.getId().toString(), 24, TimeUnit.HOURS);
+        // 存储Access Token（15分钟）
+        stringRedisTemplate.opsForValue().set(
+            "user:token:" + user.getId(),
+            accessToken,
+            15,
+            TimeUnit.MINUTES
+        );
+
+        // 存储Refresh Token（7天）
+        stringRedisTemplate.opsForValue().set(
+            "user:refresh:" + user.getId(),
+            refreshToken,
+            7,
+            TimeUnit.DAYS
+        );
 
         Map<String, String> map = new HashMap<>();
-        map.put("token", token);
+        map.put("accessToken", accessToken);
+        map.put("refreshToken", refreshToken);
         map.put("nickname", user.getNickname());
 
         return Result.success(map);
+    }
+
+    @Override
+    public Result<String> logout(Long userId) {
+        // 企业标准：清除 Redis 中的 Token，实现强制下线
+        stringRedisTemplate.delete("user:token:" + userId);
+        stringRedisTemplate.delete("user:refresh:" + userId);
+        return Result.success("退出登录成功");
+    }
+
+    /**
+     * 刷新Token
+     */
+    @Override
+    public Result<Map<String, String>> refreshToken(String refreshToken) {
+        // 1. 验证Refresh Token
+        try {
+            JwtUtils.validateToken(refreshToken);
+        } catch (Exception e) {
+            return Result.error("Refresh Token无效或已过期");
+        }
+
+        // 2. 检查Token类型
+        String type = JwtUtils.getTokenType(refreshToken);
+        if (!"refresh".equals(type)) {
+            return Result.error("Token类型错误，请使用Refresh Token");
+        }
+
+        // 3. 获取用户ID
+        Long userId = JwtUtils.getUserId(refreshToken);
+        if (userId == null) {
+            return Result.error("无法解析用户ID");
+        }
+
+        // 4. 验证Redis中的Refresh Token是否一致
+        String cachedRefreshToken = stringRedisTemplate.opsForValue().get("user:refresh:" + userId);
+        if (!refreshToken.equals(cachedRefreshToken)) {
+            return Result.error("Refresh Token已失效或在其他设备登录");
+        }
+
+        // 5. 查询用户信息
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            return Result.error("用户不存在");
+        }
+
+        // 6. 生成新的Access Token
+        String newAccessToken = JwtUtils.createToken(user.getId(), user.getPhone());
+
+        // 7. 更新Redis中的Access Token
+        stringRedisTemplate.opsForValue().set(
+            "user:token:" + user.getId(),
+            newAccessToken,
+            15,
+            TimeUnit.MINUTES
+        );
+
+        Map<String, String> map = new HashMap<>();
+        map.put("accessToken", newAccessToken);
+        map.put("refreshToken", refreshToken);  // Refresh Token不变
+
+        return Result.success(map);
+    }
+
+    /**
+     * 获取用户信息
+     */
+    @Override
+    public Result<Map<String, Object>> getUserInfo(Long userId) {
+        User user = userMapper.selectById(userId);
+        if (user == null) {
+            return Result.error("用户不存在");
+        }
+
+        Map<String, Object> info = new HashMap<>();
+        info.put("userId", user.getId());
+        info.put("phone", user.getPhone());
+        info.put("nickname", user.getNickname());
+        info.put("createTime", user.getCreateTime());
+
+        return Result.success(info);
     }
 }

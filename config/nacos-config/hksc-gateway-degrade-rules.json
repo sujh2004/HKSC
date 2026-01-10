@@ -1,0 +1,1 @@
+[\n  {\n    "resource": "hksc-product",\n    "grade": 0,\n    "count": 0.5,\n    "timeWindow": 10,\n    "minRequestAmount": 5,\n    "statIntervalMs": 1000,\n    "slowRatioThreshold": 0.5\n  },\n  {\n    "resource": "hksc-order",\n    "grade": 2,\n    "count": 50,\n    "timeWindow": 10,\n    "minRequestAmount": 5,\n    "statIntervalMs": 1000\n  }\n]

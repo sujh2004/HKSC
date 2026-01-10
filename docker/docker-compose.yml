@@ -40,6 +40,8 @@ services:
       --default-authentication-plugin=mysql_native_password
       --character-set-server=utf8mb4
       --collation-server=utf8mb4_general_ci
+      --character-set-client-handshake=FALSE
+      --init-connect='SET NAMES utf8mb4'
     volumes:
       - ./data/mysql_new:/var/lib/mysql
     networks:
@@ -72,13 +74,24 @@ services:
   hksc-es:
     image: elasticsearch:8.11.1  # 建议用新一点的版本
     container_name: hksc-es
+    hostname: hksc-es  # 修复 DNS 解析问题
     environment:
       - "discovery.type=single-node"       # 单机模式
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"   # 限制内存，防止电脑卡死
       - "xpack.security.enabled=false"     # 关闭密码，方便开发
+      - "network.host=0.0.0.0"             # 监听所有网络接口
     ports:
       - "9200:9200"
       - "9300:9300"
+    extra_hosts:
+      - "hksc-es:127.0.0.1"  # 添加本地 hosts 映射，解决 DNS 解析问题
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
     networks:
       - hksc-net
 

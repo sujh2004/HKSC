@@ -1,0 +1,1 @@
+server:\n  port: 8081\nspring:\n  datasource:\n    url: jdbc:mysql://localhost:3307/hksc_db?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true\n  # JDK 21 虚拟线程配置\n  threads:\n    virtual:\n      enabled: true

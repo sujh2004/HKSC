@@ -2,6 +2,7 @@ package com.hksc.cart.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.json.JSONUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.hksc.cart.entity.CartItem;
 import com.hksc.cart.entity.Product;
 import com.hksc.cart.feign.ProductClient;
@@ -10,6 +11,7 @@ import com.hksc.common.result.Result;
 import jakarta.annotation.Resource;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -51,6 +53,7 @@ public class CartServiceImpl implements CartService {
             cartItem.setTitle(product.getTitle());
             cartItem.setPrice(product.getPrice());
             cartItem.setImage(product.getImage());
+            cartItem.setStock(product.getStock());
             cartItem.setCount(count);
             cartItem.setChecked(true);
         }
@@ -85,5 +88,29 @@ public class CartServiceImpl implements CartService {
     public void delete(Long userId, Long productId) {
         String key = CART_PREFIX + userId;
         stringRedisTemplate.opsForHash().delete(key, productId.toString());
+    }
+
+
+
+    @Override
+    public void deleteBatch(Long userId, List<Long> productIds) {
+        if (productIds == null || productIds.isEmpty()) {
+            return;
+        }
+
+        // 1. 拼接 Redis Key
+        String key = CART_PREFIX + userId;
+
+        // 2. 转换参数格式
+        // Redis 的 delete 方法接受的是 Object... fields
+        // 所以要把 List<Long> 转成 Object[] 或者 String[]
+        Object[] hashKeys = productIds.stream()
+                .map(String::valueOf) // 转成 String
+                .toArray();
+
+        // 3. 执行 Redis 删除
+        stringRedisTemplate.opsForHash().delete(key, hashKeys);
+
+        System.out.println("【Redis购物车】批量删除成功，用户: " + userId + ", 商品: " + productIds);
     }
 }

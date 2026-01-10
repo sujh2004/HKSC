@@ -53,8 +53,10 @@ public class RabbitMQConfig {
         args.put("x-dead-letter-exchange", "order.dlx.exchange");
         // 核心配置：转发时的 routing key 是什么？
         args.put("x-dead-letter-routing-key", "order.cancel");
-        // 核心配置：统一过期时间 (比如 30分钟，这里为了测试设为 1分钟 = 60000ms)
-        args.put("x-message-ttl", 60000);
+
+        // ✅ 优化：删除队列级别TTL，改用消息级别TTL解决队头阻塞
+        // 原代码：args.put("x-message-ttl", 60*1000);
+        // 现在：每条消息发送时单独设置过期时间
 
         return QueueBuilder.durable("order.delay.queue")
                 .withArguments(args)

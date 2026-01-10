@@ -21,4 +21,6 @@ public class ProductClientFallback implements ProductClient {
     public Result<Boolean> restoreStock(Long productId, Integer count) {
         return Result.error(503, "库存回滚失败");
     }
+
+
 }

@@ -1,0 +1,51 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(docker-compose stop:*)",
+      "Bash(docker-compose rm:*)",
+      "Bash(docker-compose up:*)",
+      "Bash(docker logs:*)",
+      "Bash(curl:*)",
+      "Bash(docker ps:*)",
+      "Bash(timeout 3 redis-cli:*)",
+      "Bash(docker exec:*)",
+      "Bash(docker-compose restart:*)",
+      "Bash(test:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run dev:*)",
+      "Bash(docker-compose ps:*)",
+      "Bash(jps:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(wc:*)",
+      "Bash(mkdir:*)",
+      "Bash(cp:*)",
+      "Bash(rm:*)",
+      "Bash(git add:*)"
+    ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -c \"[console]::beep(800,300); [console]::beep(1000,200)\""
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "powershell -c \"[console]::beep(600,200)\""
+          }
+        ]
+      }
+    ]
+  }
+}

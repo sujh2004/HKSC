@@ -1,0 +1,1 @@
+server:\n  port: 8083\nspring:\n  datasource:\n    url: jdbc:mysql://localhost:3307/hksc_db?useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true

@@ -42,4 +42,34 @@ public class UserController {
     public Result<Map<String, String>> login(@RequestBody UserLoginDTO dto) { // 必须加 @RequestBody
         return userService.login(dto);
     }
+
+    /**
+     * 4. 退出登录
+     * 请求路径: POST /user/logout
+     * 企业标准：从网关传递的 X-User-Id 获取用户ID
+     */
+    @PostMapping("/logout")
+    public Result<String> logout(@RequestHeader("X-User-Id") Long userId) {
+        return userService.logout(userId);
+    }
+
+    /**
+     * 5. 刷新Token
+     * 请求路径: POST /user/refresh
+     * 请求头: Refresh-Token: xxx
+     */
+    @PostMapping("/refresh")
+    public Result<Map<String, String>> refresh(@RequestHeader("Refresh-Token") String refreshToken) {
+        return userService.refreshToken(refreshToken);
+    }
+
+    /**
+     * 6. 获取用户信息
+     * 请求路径: GET /user/info
+     * 企业标准：从网关传递的 X-User-Id 获取用户ID
+     */
+    @GetMapping("/info")
+    public Result<Map<String, Object>> getUserInfo(@RequestHeader("X-User-Id") Long userId) {
+        return userService.getUserInfo(userId);
+    }
 }
