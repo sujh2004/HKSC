@@ -1,0 +1,303 @@
+version: '3.8'
+
+# =================================================================
+# HKSC 电商平台 - 完整容器化部署方案
+# 包含：基础设施 + 应用服务
+# =================================================================
+
+networks:
+  hksc-net:
+    driver: bridge
+
+volumes:
+  mysql-data:
+  redis-data:
+  nacos-logs:
+  rabbitmq-data:
+  es-data:
+
+services:
+  # ==================== 基础设施 ====================
+
+  # MySQL 数据库
+  mysql:
+    image: mysql:8.0
+    container_name: hksc-mysql
+    restart: unless-stopped
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      TZ: Asia/Shanghai
+    command: >
+      --default-authentication-plugin=mysql_native_password
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --max_connections=1000
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./config/sql:/docker-entrypoint-initdb.d:ro
+    networks:
+      - hksc-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p${MYSQL_ROOT_PASSWORD:-root}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis 缓存
+  redis:
+    image: redis:7.2-alpine
+    container_name: hksc-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis-data:/data
+    networks:
+      - hksc-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # Nacos 注册配置中心
+  nacos:
+    image: nacos/nacos-server:v2.2.3
+    container_name: hksc-nacos
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "8848:8848"
+      - "9848:9848"
+      - "9849:9849"
+    environment:
+      MODE: standalone
+      JVM_XMS: 256m
+      JVM_XMX: 512m
+      SPRING_DATASOURCE_PLATFORM: mysql
+      MYSQL_SERVICE_HOST: mysql
+      MYSQL_SERVICE_DB_NAME: nacos_config
+      MYSQL_SERVICE_USER: root
+      MYSQL_SERVICE_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root}
+      MYSQL_SERVICE_PORT: 3306
+      TZ: Asia/Shanghai
+    volumes:
+      - nacos-logs:/home/nacos/logs
+    networks:
+      - hksc-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8848/nacos/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # RabbitMQ 消息队列
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: hksc-rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASS:-guest}
+      TZ: Asia/Shanghai
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - hksc-net
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Elasticsearch 搜索引擎
+  elasticsearch:
+    image: elasticsearch:8.11.1
+    container_name: hksc-es
+    restart: unless-stopped
+    ports:
+      - "9200:9200"
+    environment:
+      discovery.type: single-node
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+      xpack.security.enabled: "false"
+      TZ: Asia/Shanghai
+    volumes:
+      - es-data:/usr/share/elasticsearch/data
+    networks:
+      - hksc-net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9200/_cluster/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ==================== 应用服务 ====================
+
+  # 网关服务
+  gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: hksc-gateway
+    image: hksc/gateway:${VERSION:-latest}
+    container_name: hksc-gateway
+    restart: unless-stopped
+    depends_on:
+      nacos:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      NACOS_SERVER_ADDR: nacos:8848
+      TZ: Asia/Shanghai
+    networks:
+      - hksc-net
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 3
+
+  # 用户服务
+  user:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: hksc-user
+    image: hksc/user:${VERSION:-latest}
+    container_name: hksc-user
+    restart: unless-stopped
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      NACOS_SERVER_ADDR: nacos:8848
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      TZ: Asia/Shanghai
+    networks:
+      - hksc-net
+
+  # 商品服务
+  product:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: hksc-product
+    image: hksc/product:${VERSION:-latest}
+    container_name: hksc-product
+    restart: unless-stopped
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      NACOS_SERVER_ADDR: nacos:8848
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      TZ: Asia/Shanghai
+    networks:
+      - hksc-net
+
+  # 购物车服务
+  cart:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: hksc-cart
+    image: hksc/cart:${VERSION:-latest}
+    container_name: hksc-cart
+    restart: unless-stopped
+    depends_on:
+      nacos:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      NACOS_SERVER_ADDR: nacos:8848
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      TZ: Asia/Shanghai
+    networks:
+      - hksc-net
+
+  # 订单服务
+  order:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: hksc-order
+    image: hksc/order:${VERSION:-latest}
+    container_name: hksc-order
+    restart: unless-stopped
+    depends_on:
+      nacos:
+        condition: service_healthy
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      NACOS_SERVER_ADDR: nacos:8848
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      TZ: Asia/Shanghai
+    networks:
+      - hksc-net
+
+  # 搜索服务
+  search:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SERVICE_NAME: hksc-search
+    image: hksc/search:${VERSION:-latest}
+    container_name: hksc-search
+    restart: unless-stopped
+    depends_on:
+      nacos:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      NACOS_SERVER_ADDR: nacos:8848
+      ES_HOST: elasticsearch
+      ES_PORT: 9200
+      TZ: Asia/Shanghai
+    networks:
+      - hksc-net

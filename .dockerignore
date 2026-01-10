@@ -1,0 +1,41 @@
+# Git
+.git
+.gitignore
+.github
+
+# IDE
+.idea
+.vscode
+*.iml
+
+# 构建产物
+target/
+*/target/
+*.jar
+!**/target/*.jar
+
+# 日志
+*.log
+logs/
+
+# 临时文件
+*.tmp
+*.temp
+.DS_Store
+
+# 文档
+*.md
+docs/
+sums/
+
+# 部署相关
+deploy/data/
+deploy/*.log
+
+# Node.js (前端)
+node_modules/
+hksc-frontend/
+
+# 配置文件（敏感信息）
+*.env
+.env.*
